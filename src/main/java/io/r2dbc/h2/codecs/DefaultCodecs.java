@@ -112,7 +112,7 @@ public final class DefaultCodecs implements Codecs {
      * @return a {@link List} of default {@link Codec}s
      */
     static List<Codec<?>> createCodecs(Client client, ClassLoader classLoader, Codecs codecs) {
-        return Stream.concat(
+        return Stream.concat(Stream.concat(
             Stream.of(
                 new BigDecimalCodec(),
                 new BlobToByteBufferCodec(client),
@@ -139,13 +139,14 @@ public final class DefaultCodecs implements Codecs {
                 new InstantCodec(client),
                 new IntervalCodec(),
                 new PeriodCodec(),
-                new DurationCodec(),
-
-                // De-prioritized codecs
+                new DurationCodec()
+            ),
+            addOptionalCodecs(classLoader)),
+            Stream.of(
+                // De-prioritized codecs, must be added after optional codecs to avoid stack overflow
                 new ArrayCodec(codecs),
                 new ParameterCodec(codecs)
-            ),
-            addOptionalCodecs(classLoader)
+            )
         ).collect(Collectors.toList());
     }
 
